@@ -7,11 +7,12 @@
     <ProjectGuid>{F9A8F5DC-ED22-418B-94DF-3C79D092577F}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>FMon</RootNamespace>
-    <AssemblyName>FMon</AssemblyName>
-    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <RootNamespace>FileMon</RootNamespace>
+    <AssemblyName>FileMon</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <IsWebBootstrapper>false</IsWebBootstrapper>
+    <TargetFrameworkProfile />
     <PublishUrl>publish\</PublishUrl>
     <Install>true</Install>
     <InstallFrom>Disk</InstallFrom>
@@ -50,26 +51,28 @@
     <SignAssembly>true</SignAssembly>
   </PropertyGroup>
   <PropertyGroup>
-    <AssemblyOriginatorKeyFile>FileMon.exe.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>Ex.snk</AssemblyOriginatorKeyFile>
+  </PropertyGroup>
+  <PropertyGroup>
+    <StartupObject>
+    </StartupObject>
   </PropertyGroup>
   <ItemGroup>
     <None Include="App.config" />
-    <None Include="FileMon.exe.snk" />
+    <None Include="Ex.snk" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Main.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="ComplexParameterInject">
-      <HintPath>ref\ComplexParameterInject.dll</HintPath>
-    </Reference>
-    <Reference Include="ComplexParameterTest">
-      <HintPath>ref\ComplexParameterTest.exe</HintPath>
-    </Reference>
     <Reference Include="EasyHook, Version=2.7.4761.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>ref\EasyHook.dll</HintPath>
+    </Reference>
+    <Reference Include="EasyHook32Svc, Version=2.7.4761.0, Culture=neutral, PublicKeyToken=4b580fca19d0b0c5, processorArchitecture=x86">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\EasyHook32Svc.exe</HintPath>
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Remoting" />

@@ -4,7 +4,7 @@ using System.Runtime.Remoting;
 using System.Text;
 using EasyHook;
 using System.Runtime.InteropServices;
-
+using System.Diagnostics;
 namespace FileMon
 {
     public class FileMonInterface : MarshalByRefObject
@@ -35,10 +35,9 @@ namespace FileMon
     class Program
     {
         static String ChannelName = null;
-        static int pid=0;
+        static int pid=2420;
         static void Main(string[] args)
         {
-            Console.WriteLine(args[0]);
             try
             {
                 Config.Register(
@@ -49,12 +48,16 @@ namespace FileMon
                 RemoteHooking.IpcCreateServer<FileMonInterface>(
                      ref ChannelName, WellKnownObjectMode.SingleCall);
 
-                /*RemoteHooking.Inject(
-                    Int32.Parse(args[0]),
+                Process p = Process.Start("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe");
+                
+                RemoteHooking.Inject(
+                    p.Id,
                     "FileMonInject.dll",
                     "FileMonInject.dll",
-                    ChannelName);*/
-                RemoteHooking.CreateAndInject("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe","",0,"FileMonInject.dll", "FileMonInject.dll", out pid,ChannelName);
+                    ChannelName);
+                //RemoteHooking.CreateAndInject("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe","",0,"FileMonInject.dll", "FileMonInject.dll", out pid,ChannelName);
+                //RemoteHooking.CreateAndInject("C:\\Program Files (x86)\\Notepad++\\Notepad++.exe","",0,"FileMonInject.dll", "FileMonInject.dll", out pid,ChannelName);
+                //RemoteHooking.CreateAndInject("C:\\Program Files (x86)\\Audacity\\audacity.exe", "", 0, "FileMonInject.dll", "FileMonInject.dll", out pid, ChannelName);
 
                 Console.ReadLine();
             }
