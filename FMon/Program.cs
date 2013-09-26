@@ -35,7 +35,7 @@ namespace FileMon
     class Program
     {
         static String ChannelName = null;
-        static int pid=2420;
+        static int pid=0;
         static void Main(string[] args)
         {
             try
