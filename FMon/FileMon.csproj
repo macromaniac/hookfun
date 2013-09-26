@@ -74,6 +74,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>ref\EasyHook32Svc.exe</HintPath>
     </Reference>
+    <Reference Include="FileMonInject, Version=1.0.0.0, Culture=neutral, PublicKeyToken=5ce961722f4eac19, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>ref\FileMonInject.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Runtime.Remoting" />
   </ItemGroup>

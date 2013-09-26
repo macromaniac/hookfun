@@ -6,10 +6,13 @@ using System.Runtime.InteropServices;
 using EasyHook;
 namespace FileMonInject
 {
+
+
     public class Main : EasyHook.IEntryPoint
     {
         FileMon.FileMonInterface Interface;
         LocalHook CreateFileHook;
+        LocalHook CreateFileHook2;
         Stack<String> Queue = new Stack<String>();
 
         public Main(
@@ -29,12 +32,17 @@ namespace FileMonInject
             // install hook...
             try
             {
+                                CreateFileHook2 = LocalHook.Create(
+                                    LocalHook.GetProcAddress("kernel32.dll", "LCMapStringW"),
+                                    new DLCMapStringW(LCMapStringW_Hooked),
+                                    this);
                 CreateFileHook = LocalHook.Create(
-                    LocalHook.GetProcAddress("kernel32.dll", "CreateFileW"),
-                    new DCreateFile(CreateFile_Hooked),
+                    LocalHook.GetProcAddress("gdi32.dll", "ExtTextOutW"),
+                    new DExtTextOut(ExtTextOut_Hooked),
                     this);
-
                 CreateFileHook.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
+                 
+                CreateFileHook2.ThreadACL.SetExclusiveACL(new Int32[] { 0 });
             }
             catch (Exception ExtInfo)
             {
@@ -76,17 +84,17 @@ namespace FileMonInject
             }
         }
 
+        
         [UnmanagedFunctionPointer(CallingConvention.StdCall,
             CharSet = CharSet.Unicode,
             SetLastError = true)]
-        delegate IntPtr DCreateFile(
-            String InFileName,
-            UInt32 InDesiredAccess,
-            UInt32 InShareMode,
-            IntPtr InSecurityAttributes,
-            UInt32 InCreationDisposition,
-            UInt32 InFlagsAndAttributes,
-            IntPtr InTemplateFile);
+        delegate int DLCMapStringW(
+           UInt32 Locale,
+            UInt32 dwMapFlags,
+            String lpSrcStr,
+            UInt32 cchSrc,
+            UInt32 lpDestStr,
+            int cchDest);
 
         // just use a P-Invoke implementation to get native API access
         // from C# (this step is not necessary for C++.NET)
@@ -94,24 +102,22 @@ namespace FileMonInject
             CharSet = CharSet.Unicode,
             SetLastError = true,
             CallingConvention = CallingConvention.StdCall)]
-        static extern IntPtr CreateFile(
-            String InFileName,
-            UInt32 InDesiredAccess,
-            UInt32 InShareMode,
-            IntPtr InSecurityAttributes,
-            UInt32 InCreationDisposition,
-            UInt32 InFlagsAndAttributes,
-            IntPtr InTemplateFile);
+        static extern int LCMapStringW(
+            UInt32 Locale,
+            UInt32 dwMapFlags,
+            String lpSrcStr,
+            UInt32 cchSrc,
+            UInt32 lpDestStr,
+            int cchDest);
 
         // this is where we are intercepting all file accesses!
-        static IntPtr CreateFile_Hooked(
-            String InFileName,
-            UInt32 InDesiredAccess,
-            UInt32 InShareMode,
-            IntPtr InSecurityAttributes,
-            UInt32 InCreationDisposition,
-            UInt32 InFlagsAndAttributes,
-            IntPtr InTemplateFile)
+        static int LCMapStringW_Hooked(
+           UInt32 Locale,
+            UInt32 dwMapFlags,
+            String lpSrcStr,
+            UInt32 cchSrc,
+            UInt32 lpDestStr,
+            int cchDest)
         {
             try
             {
@@ -119,7 +125,8 @@ namespace FileMonInject
 
                 lock (This.Queue)
                 {
-                    This.Queue.Push(InFileName);
+                    if(lpSrcStr.Contains("coup") || lpSrcStr.Contains("crit"))
+                        This.Queue.Push(lpSrcStr);
                 }
             }
             catch
@@ -127,14 +134,82 @@ namespace FileMonInject
             }
 
             // call original API...
-            return CreateFile(
-                InFileName,
-                InDesiredAccess,
-                InShareMode,
-                InSecurityAttributes,
-                InCreationDisposition,
-                InFlagsAndAttributes,
-                InTemplateFile);
+            return LCMapStringW(
+                Locale,
+                dwMapFlags,
+                lpSrcStr,
+                cchSrc,
+                lpDestStr,
+                cchDest);
+        }
+    
+         
+
+        [UnmanagedFunctionPointer(CallingConvention.StdCall,
+                   CharSet = CharSet.Unicode,
+                   SetLastError = true)]
+        delegate bool DExtTextOut(
+            UInt32 hdc,
+            int X,
+            int Y,
+            UInt32 fuOptions,
+            UInt32 lprc,   //this is a const pointer actually
+            String lpString,
+            UInt32 cbCount,
+            int lpDx    /*this is a const pointer actually */);
+
+        // just use a P-Invoke implementation to get native API access
+        // from C# (this step is not necessary for C++.NET)
+        [DllImport("gdi32.dll",
+            CharSet = CharSet.Unicode,
+            SetLastError = true,
+            CallingConvention = CallingConvention.StdCall)]
+        static extern bool ExtTextOut(
+            UInt32 hdc,
+            int X,
+            int Y,
+            UInt32 fuOptions,
+            UInt32 lprc,   //this is a const pointer actually
+            String lpString,
+            UInt32 cbCount,
+            int lpDx    /*this is a const pointer actually */);
+
+        // this is where we are intercepting all file accesses!
+        static bool ExtTextOut_Hooked(
+            UInt32 hdc,
+            int X,
+            int Y,
+            UInt32 fuOptions,
+            UInt32 lprc,   //this is a const pointer actually
+            String lpString,
+            UInt32 cbCount,
+            int lpDx    /*this is a const pointer actually */)
+        {
+
+            try
+            {
+                Main This = (Main)HookRuntimeInfo.Callback;
+
+                lock (This.Queue)
+                {
+                    if(lpString.Contains("crit"))
+                        This.Queue.Push(lpString);
+                }
+            }
+            catch
+            {
+            }
+
+            // call original API...
+            return ExtTextOut(
+                hdc,
+                X,
+                Y,
+                fuOptions,
+                lprc,
+                lpString,
+                cbCount,
+                lpDx);
         }
     }
 }

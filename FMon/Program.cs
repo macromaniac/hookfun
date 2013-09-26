@@ -18,7 +18,16 @@ namespace FileMon
         {
             for (int i = 0; i < InFileNames.Length; i++)
             {
-                Console.WriteLine(InFileNames[i]);
+                if (i > 0)
+                {
+                    //get rid of repeats
+                    //if( !InFileNames[i].Equals(InFileNames[i-1]) )
+                        Console.WriteLine(InFileNames[i]);
+                }
+                else
+                {
+                    Console.WriteLine(InFileNames[i]);
+                }
             }
         }
 
@@ -40,6 +49,7 @@ namespace FileMon
         {
             try
             {
+
                 Config.Register(
                         "A FileMon like demo application.",
                         "FileMon.exe",
@@ -48,10 +58,25 @@ namespace FileMon
                 RemoteHooking.IpcCreateServer<FileMonInterface>(
                      ref ChannelName, WellKnownObjectMode.SingleCall);
 
-                Process p = Process.Start("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe");
+                //Process p = Process.Start("C:\\Program Files (x86)\\Audacity\\audacity.exe");
+
+                //Process p = Process.Start("C:\\Program Files (x86)\\Steam\\steamapps\\common\\dota 2 beta\\dota.exe","-console");
+                Process p = Process.Start("C:\\Program Files (x86)\\Steam\\Steam.exe", "-applaunch 570");
+
                 
+                System.Threading.Thread.Sleep(5000);
+
+                //This is really sloppy, I use window titles to find the pid because launching via steam doesn't return the pid
+                var processes = Process.GetProcesses();
+                foreach (var process in processes)
+                {
+                    var Wintitle = process.MainWindowTitle;
+                    if(Wintitle.ToString().ToUpper() == "DOTA 2")
+                        pid = process.Id;
+                }
+
                 RemoteHooking.Inject(
-                    p.Id,
+                    pid,
                     "FileMonInject.dll",
                     "FileMonInject.dll",
                     ChannelName);
