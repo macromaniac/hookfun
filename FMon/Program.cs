@@ -48,7 +48,8 @@ namespace FileMon
                 RemoteHooking.IpcCreateServer<FileMonInterface>(
                      ref ChannelName, WellKnownObjectMode.SingleCall);
 
-                Process p = Process.Start("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe");
+                //Process p = Process.Start("C:\\Program Files\\Microsoft Games\\Solitaire\\Solitaire.exe");
+                Process p = Process.Start("C:\\Program Files (x86)\\Notepad++\\notepad++.exe");
                 
                 RemoteHooking.Inject(
                     p.Id,
